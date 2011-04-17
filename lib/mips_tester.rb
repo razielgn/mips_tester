@@ -1,4 +1,4 @@
-require 'tempfile'
+require 'tempfile' unless defined? Tempfile
 require 'pp'
 
 module MIPSTester
@@ -13,56 +13,63 @@ module MIPSTester
       raise Exception.new("Provide valid Mars jar!") if not @mars_path or not File.exists? @mars_path
     end
   
-    def run(file)
+    def run(file, &block)
       raise Exception.new("Provide valid file!") if not file or not File.exists? file
+      raise Exception.new("Provide block!") if not block
     
-      regs = {}
-      expected = {}
-    
-      yield regs, expected
+      reset!
+  
+      instance_eval(&block)
     
       asm = Tempfile.new "temp.asm"
-      asm.write prep_registers(regs)
+      asm.write prep_registers(@regs)
       asm.write File.read(file)
       asm.close
     
-  #    puts "\nASM (#{asm.path}):\n#{File.read asm.path}"
-  
-      cmd = "#{["java -jar", @mars_path, regs.keys.join(" "), "nc dec", asm.path].join(" ")}"
-    
-      puts "\nCMD:#{cmd}\n\n"
-    
-      a = `#{cmd}`
-    
-      pp a
-      gets
+      cli = `#{["java -jar", @mars_path, @regs.keys.join(" "), "nc dec", asm.path].join(" ")}`
     
       begin
-        g = parse_results a
-      rescue Exception
-        puts "Errors in file:\n#{File.read asm}"
+        results = parse_results cli
+        
+        if @verbose
+          puts "\nExpected:"
+          pp @exp
+          puts "\nResults:"
+          pp results
+        end
+        
+        return compare_hashes(@exp, results)
+      rescue Exception => ex
+        puts ex.message
         return nil
+      ensure
+        asm.unlink
       end
-    
-      asm.unlink
-    
-      #puts "\nResults:"
-      #pp g
-      g
     end
   
     private
+    
+    def verbose!; @verbose = true; end
+    def register hash; @regs.merge! hash; end
+    def expected hash; @exp.merge! hash; end
+    
+    def reset!
+      @regs = {}; @exp = {}; @verbose = false
+    end
   
     def parse_results(results)
-    
       if results =~ /^Error/
-        throw Exception.new "Error in file"
+        throw Exception.new "Error in file\nReason: #{results}\n\n"
       end
-    
+      
+      out = {}
+      
       results.split("\n")[1..-1].map do |reg|
         g = reg.strip.split("\t")
-        {g[0] => g[1].to_i}
+        out.merge! g[0].gsub("$", "") => g[1].to_i
       end
+      
+      out
     end
   
     def prep_registers(regs)
@@ -77,6 +84,14 @@ module MIPSTester
         end
       end
       out
+    end
+    
+    def compare_hashes(first, second)
+      first.each_pair do |key, value|
+        return false unless second[key.to_s] == value
+      end
+      
+      true
     end
   end
 end
