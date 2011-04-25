@@ -19,14 +19,10 @@ It relies on MARS (it's ugly I know, but SPIM's cli doesn't work with automated 
 	$> irb
 	$irb :001> require 'mips_tester'
 	$irb :002> tester = MIPSTester::MIPS.new :mars_path => "/Applications/MARS_4_1.jar"
-	$irb :003> tester.run "test.asm" do
-	$irb :004>		register :s0 => 0x01
-	$irb :005>		register :s1 => 0x45
-	$irb :006>		expected :s0 => 0x01, :s1 => 0x45
+	$irb :003> tester.test "test.asm" do
+	$irb :004>		set :s0 => 0x01
+	$irb :005>		set '0x10010004' => 45
+	$irb :006>		expect :s0 => 0x01, :s1 => 0x45
 	$irb :007>		verbose! # Optional verbosity!
 	$irb :008> end
 		=> true
-
-## TO-DOs
-* Ability to input memory address and expect their results
-* Better failing messages
