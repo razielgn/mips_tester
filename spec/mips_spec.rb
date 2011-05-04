@@ -2,6 +2,10 @@ require 'spec_helper'
 include MIPSTester
 
 describe MIPS do
+  let :mips do
+    MIPS.new :mars_path => "/Applications/MARS_4_1.jar"
+  end
+  
   context 'passing wrong parameters' do
     it 'should raise exception if not valid MARS path is given' do
       expect do
@@ -25,11 +29,7 @@ describe MIPS do
   end
   
   
-  context 'work on empty file' do
-    let :mips do
-      MIPS.new :mars_path => "/Applications/MARS_4_1.jar"
-    end
-    
+  context 'work on empty file' do  
     it 'should expect given register values' do
       mips.test fixture_path("empty.asm") do
         set :s0 => 0x0C, :s1 => 0x3F
@@ -55,6 +55,22 @@ describe MIPS do
       mips.test fixture_path("empty.asm") do
         set '0x10010000' => 45, :s0 => 32
         expect '0x10010000' => 45, :s0 => 32
+      end.should be_true
+    end
+  end
+  
+  context 'add.asm' do
+    it 'should expect 11 when adding 5 and 6' do
+      mips.test fixture_path("add.asm") do
+        set :t1 => 5, :t2 => 6
+        expect :t0 => 11
+      end.should be_true
+    end
+    
+    it 'should expect -9 when adding 18 and -27' do
+      mips.test fixture_path("add.asm") do
+        set :t1 => 18, :t2 => -27
+        expect :t0 => -9
       end.should be_true
     end
   end

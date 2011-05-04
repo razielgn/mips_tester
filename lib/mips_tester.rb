@@ -69,7 +69,7 @@ module MIPSTester
     
       cli = `#{["java -jar",
                 @mars_path,
-                @regs.empty? ? "" : @regs.keys.join(" "), 
+                @exp.empty? ? "" : @exp.keys.join(" "), 
                 @addresses.empty? ? "" : [@addresses.keys.min, @addresses.keys.max].join("-"),
                 "nc dec",
                 asm.path].join(" ")}`
