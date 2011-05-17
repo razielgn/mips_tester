@@ -64,7 +64,8 @@ module MIPSTester
       instance_eval(&block)
     
       asm = Tempfile.new "temp.asm"
-      asm.write(prep_params + File.read(file))
+      asm.write prep_params if block
+      asm.write File.read(file)
       asm.close
     
       cli = `#{["java -jar",
@@ -81,8 +82,7 @@ module MIPSTester
         
         return compare_hashes(@exp, results)
       rescue Exception => ex
-        puts ex.message
-        return false
+        raise MIPSFileError.new ex.message.gsub(asm.path, File.basename(file)).split("\n")[0..1].join("\n")
       ensure
         asm.unlink
       end
