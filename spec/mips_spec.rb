@@ -14,17 +14,24 @@ describe MIPS do
     end
     
     it 'should raise exception if not valid file path is given' do
-      mips = MIPS.new :mars_path => "/Applications/MARS_4_1.jar"
       expect do
-        mips.test fixture_path("non-existing.asm") {}
+        mips.test fixture_path("non-existing.asm")
       end.to raise_error(::MIPSFileError)
     end
     
     it 'should raise exception if no block is given on test method' do
-      mips = MIPS.new :mars_path => "/Applications/MARS_4_1.jar"
       expect do
         mips.test fixture_path("empty.asm")
       end.to raise_error(::MIPSInvalidBlockError)
+    end
+    
+    it 'should raise exception if file given isn\'t parsable by MARS' do
+      expect do
+        mips.test fixture_path("invalid_syntax.asm") do
+          set t1: 0, t2: 3
+          expect t1: 0, t2: 3
+        end
+      end.to raise_error(::MIPSFileError)
     end
   end
   
