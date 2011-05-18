@@ -26,3 +26,9 @@ It relies on MARS (it's ugly I know, but SPIM's cli doesn't work with automated 
 	$irb :007>		verbose! # Optional verbosity!
 	$irb :008> end
 		=> true
+		
+## Compatibility
+### Tested on
+* ruby-1.9.2-p180
+* ruby-1.8.7-p330
+* rbx-head 1.2.4dev

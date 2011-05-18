@@ -12,9 +12,9 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/razielgn/mips_tester'
   s.description = s.summary + ". It relies on MARS\' cli, so be sure to download its JAR first."
 
-  s.required_ruby_version = '>=1.9.2'
+  s.required_ruby_version = '>= 1.8.7'
 
-  s.add_development_dependency 'rspec', '>2.0'
+  s.add_development_dependency 'rspec', '>= 2.6'
 
   s.files = `git ls-files`.split("\n")
   s.test_files = `git ls-files -- spec/*`.split("\n")

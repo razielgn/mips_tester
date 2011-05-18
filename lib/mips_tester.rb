@@ -3,7 +3,7 @@ require 'tempfile' unless defined? Tempfile
 # Main MIPSTester module
 module MIPSTester
   # Library version
-  VERSION = "0.1.2"
+  VERSION = "0.1.3"
   
   # MIPSFileError Exception, raised when test file is not valid or non-existent
   class MIPSFileError < Exception; end
@@ -94,10 +94,10 @@ module MIPSTester
     
     def set hash
       hash.each_pair do |key, value|
-        case key
+        case key.to_s
           when REGISTER_REGEX then @regs.merge! key => value
           when ADDRESS_REGEX then @addresses.merge! key => value
-          else puts "Warning: #{key} not recognized as register or memory address. Discarded."
+          else puts "Warning: #{key.inspect} not recognized as register or memory address. Discarded."
         end
       end
     end

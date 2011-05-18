@@ -28,8 +28,8 @@ describe MIPS do
     it 'should raise exception if file given isn\'t parsable by MARS' do
       expect do
         mips.test fixture_path("invalid_syntax.asm") do
-          set t1: 0, t2: 3
-          expect t1: 0, t2: 3
+          set :t1 => 0, :t2 => 3
+          expect :t1 => 0, :t2 => 3
         end
       end.to raise_error(::MIPSFileError)
     end
