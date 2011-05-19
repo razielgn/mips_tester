@@ -53,8 +53,8 @@ describe MIPS do
     
     it 'should expect given memory address values' do
       mips.test fixture_path("empty.asm") do
-        set '0x10010000' => 45, '0x10010010' => 32, '0x10010020' => 0xFF
-        expect '0x10010000' => 45, '0x10010010' => 32, '0x10010020' => 0xFF
+        set '0x10010010' => 45, '0x10010020' => 32, '0x10010030' => 0xFF
+        expect '0x10010010' => 45, '0x10010020' => 32, '0x10010030' => 0xFF
       end.should be_true
     end
     
@@ -79,6 +79,15 @@ describe MIPS do
         set :t1 => 18, :t2 => -27
         expect :t0 => -9
       end.should be_true
+    end
+  end
+  
+  context 'memory.asm' do
+    it 'should get the value given to s0 in memory address 0x10010060' do
+      mips.test fixture_path("memory.asm") do
+        set :s0 => 78
+        expect "0x10010060" => 78, :s0 => 78
+      end
     end
   end
 end

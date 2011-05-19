@@ -3,7 +3,7 @@ require 'tempfile' unless defined? Tempfile
 # Main MIPSTester module
 module MIPSTester
   # Library version
-  VERSION = "0.1.3"
+  VERSION = "0.1.4"
   
   # MIPSFileError Exception, raised when test file is not valid or non-existent
   class MIPSFileError < Exception; end
@@ -70,17 +70,17 @@ module MIPSTester
     
       cli = `#{["java -jar",
                 @mars_path,
-                @exp.empty? ? "" : @exp.keys.join(" "), 
-                @addresses.empty? ? "" : [@addresses.keys.min, @addresses.keys.max].join("-"),
-                "nc dec",
+                @exp_regs.empty? ? "" : @exp_regs.keys.join(" "), 
+                @exp_addresses.empty? ? "" : @exp_addresses.map{|addr| "#{addr[0]}-#{addr[0].to_i 16}"}.join(" "),
+                " nc dec",
                 asm.path].join(" ")}`
       
       begin
         results = parse_results cli
         
-        puts "Expected:\n#{@exp}\nResults:\n#{results}" if @verbose
+        puts "Expected:\n#{@exp_regs.dup.merge @exp_addresses}\nResults:\n#{results}" if @verbose
         
-        return compare_hashes(@exp, results)
+        return compare_hashes(@exp_regs.dup.merge(@exp_addresses), results)
       rescue Exception => ex
         raise MIPSFileError.new ex.message.gsub(asm.path, File.basename(file)).split("\n")[0..1].join("\n")
       ensure
@@ -95,17 +95,29 @@ module MIPSTester
     def set hash
       hash.each_pair do |key, value|
         case key.to_s
-          when REGISTER_REGEX then @regs.merge! key => value
-          when ADDRESS_REGEX then @addresses.merge! key => value
+          when REGISTER_REGEX then @set_regs.merge! key => value
+          when ADDRESS_REGEX then @set_addresses.merge! key => value
           else puts "Warning: #{key.inspect} not recognized as register or memory address. Discarded."
         end
       end
     end
     
-    def expect hash; @exp.merge! hash; end
+    def expect hash
+      hash.each_pair do |key, value|
+        case key.to_s
+          when REGISTER_REGEX then @exp_regs.merge! key => value
+          when ADDRESS_REGEX then @exp_addresses.merge! key => value
+          else puts "Warning: #{key.inspect} not recognized as register or memory address. Discarded."
+        end
+      end
+    end
     
     def reset!
-      @regs = {}; @addresses = {}; @exp = {}; @verbose = false
+      @set_regs = {}
+      @set_addresses = {}
+      @exp_regs = {}
+      @exp_addresses = {}
+      @verbose = false
     end
   
     def parse_results(results)
@@ -128,8 +140,8 @@ module MIPSTester
   
     def prep_params
       out = ""
-      @regs.each_pair {|key, value| out << "li\t\t$#{key}, #{value}\n" }
-      @addresses.each_pair do |key, value|
+      @set_regs.each_pair {|key, value| out << "li\t\t$#{key}, #{value}\n" }
+      @set_addresses.each_pair do |key, value|
         out << "li\t\t$t0, #{key}\n"
         out << "li\t\t$t1, 0x#{value.to_s(16)}\n"
         out << "sb\t\t$t1, ($t0)\n"
