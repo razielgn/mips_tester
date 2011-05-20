@@ -3,7 +3,7 @@ require 'tempfile' unless defined? Tempfile
 # Main MIPSTester module
 module MIPSTester
   # Library version
-  VERSION = "0.1.4"
+  VERSION = "0.1.5"
   
   # MIPSFileError Exception, raised when test file is not valid or non-existent
   class MIPSFileError < Exception; end
