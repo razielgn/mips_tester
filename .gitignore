@@ -53,3 +53,5 @@ InstalledFiles
 .yardoc
 _yardoc
 doc/
+
+Gemfile.lock
